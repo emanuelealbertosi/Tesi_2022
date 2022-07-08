@@ -1,0 +1,13 @@
+# syntax=docker/dockerfile:1
+
+FROM python:3.8-slim-buster
+
+WORKDIR /fpadfrules
+ADD . /fpadfrules
+
+COPY . /fpadfrules
+RUN pip3 install -r requirements.txt
+
+EXPOSE 5000
+ENTRYPOINT [ "python3" ]
+CMD [ "fpadfrules.py" ]

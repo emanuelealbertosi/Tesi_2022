@@ -1,0 +1,15 @@
+# syntax=docker/dockerfile:1
+
+FROM python:3.8-slim-buster
+
+WORKDIR /mycrop
+ADD . /mycrop
+
+COPY . /mycrop
+RUN pip3 install -r requirements.txt
+ENV AWS_ACCESS_KEY_ID=xxxxxxxx
+ENV AWS_SECRET_ACCESS_KEY=xxxxxxxx
+
+EXPOSE 5000
+ENTRYPOINT [ "python3" ]
+CMD [ "mycrop.py" ]

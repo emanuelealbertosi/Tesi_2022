@@ -1,0 +1,361 @@
+#node(private2, privateCitizen2, [pubKeyE], [py3,docker], (512,2,1500)).
+Nodes:
+- Node:
+    id: "private1"
+    providerId: "privateCitizen1"
+    securitySpecs:
+    swCapabilities:
+    - "js"
+    - "docker"
+    hwCapabilities:
+      memory: 1024
+      cpu: 4
+      mhz: 2500 
+- Node:
+    id: "private2"
+    providerId: "privateCitizen2"
+    securitySpecs:
+    - "pubKeyE"
+    swCapabilities:
+    - "py3"
+    - "docker"
+    hwCapabilities:
+      memory: 512
+      cpu: 2
+      mhz: 1500    
+- Node:
+    id: "isprouter"
+    providerId: "telco"
+    securitySpecs:
+    - "pubKeyE"
+    - "antiTamp"
+    swCapabilities:
+    - "js"
+    - "py3"
+    - "docker"
+    hwCapabilities:
+      memory: 3500
+      cpu: 8
+      mhz: 2000
+- Node:
+    id: "antenna1"
+    providerId: "telco"
+    securitySpecs:
+    - "pubKeyE"
+    - "antiTamp"
+    swCapabilities:
+    - "js"
+    - "py3"
+    - "docker"
+    hwCapabilities:
+      memory: 2048
+      cpu: 3
+      mhz: 1500  
+- Node:
+    id: "antenna2"
+    providerId: "telco"
+    securitySpecs:
+    - "pubKeyE"
+    swCapabilities:
+    - "py3"
+    - "numPy"
+    - "docker"
+    hwCapabilities:
+      memory: 2048
+      cpu: 4
+      mhz: 1500
+- Node:
+    id: "labserver"
+    providerId: "university"
+    securitySpecs:
+    - "pubKeyE"
+    - "antiTamp"
+    swCapabilities:
+    - "py3"
+    - "numPy"
+    - "docker"
+    hwCapabilities:
+      memory: 4096
+      cpu: 4
+      mhz: 2000
+- Node:
+    id: "officeserver"
+    providerId: "university"
+    securitySpecs:
+    swCapabilities:
+    - "py3"
+    - "docker"
+    hwCapabilities:
+      memory: 1024
+      cpu: 2
+      mhz: 1000
+- Node:
+    id: "switch"
+    providerId: "university"
+    securitySpecs:
+    - "pubKeyE"
+    swCapabilities:
+    - "py3"
+    - "js"
+    - "docker"
+    hwCapabilities:
+      memory: 2048
+      cpu: 2
+      mhz: 2000 
+- Node:
+    id: "cloudnode"
+    providerId: "cloudProvider"
+    securitySpecs:
+    - "pubKeyE"
+    - "antiTamp"
+    swCapabilities:
+    - "py3"
+    - "js"
+    - "numPy"
+    hwCapabilities:
+    #0=inf
+      memory: "inf"
+      cpu: "inf"
+      mhz: "inf"
+#%eventGenerator(generatorId, eventType, SourceNodes)
+EventGenerator:
+      generatorId: "userDevice"
+      eventType:
+      sourceNodes: "isprouter"
+Services:
+- Service:
+    serviceId: "myUserDb"
+    serviceProvider: "appOp"
+    serviceType: "userDB"
+    deployedNode: "isprouter"
+- Service:
+    serviceId: "cMaps"
+    serviceProvider: "cloudProvider"
+    serviceType: "maps"
+    deployedNode: "cloudnode"   
+- Service:
+    serviceId: "openM"
+    serviceProvider: "openS"
+    serviceType: "maps"
+    deployedNode: "private1"
+#- Service:
+#    serviceId: "myShop"
+#    serviceProvider: "appOp"
+#    serviceType: "shops"
+#    deployedNode: "switch"
+- Service:
+    serviceId: "gp"
+    serviceProvider: "pa"
+    serviceType: "checkGp"
+    deployedNode: "isprouter"  
+- Service:
+    serviceId: "rules"
+    serviceProvider: "pa"
+    serviceType: "checkRules"
+    deployedNode: "antenna1"
+#- Service:
+#    serviceId: "publicGatherService"
+#    serviceProvider: "pub_amm"
+#    serviceType: "gatherService"
+#    deployedNode: "antenna2"                        
+
+
+
+
+#STATICO
+#%link(node1, node2, latencyInMs)
+#link(X,X,0).
+#link(X,Y,L) :- dif(X,Y), (latency(X,Y,L);latency(Y,X,L)).
+#%cloudnode
+#latency(cloudnode, isprouter, 30).
+Latencies:
+- Latency:
+   Node1: "cloudnode"
+   Node2: "isprouter"
+   value: 30
+
+#latency(cloudnode, antenna1, 38).
+#latency(cloudnode, antenna2, 37).
+#latency(cloudnode, private1, 36).
+#latency(cloudnode, private2, 45).
+#latency(cloudnode, switch, 35).
+#latency(cloudnode, officeserver, 42).
+#latency(cloudnode, labserver, 40).
+- Latency:
+   Node1: "cloudnode"
+   Node2: "antenna1"
+   value: 38
+- Latency:
+   Node1: "cloudnode"
+   Node2: "private1"
+   value: 36
+- Latency:
+   Node1: "cloudnode"
+   Node2: "private2"
+   value: 45
+- Latency:
+   Node1: "cloudnode"
+   Node2: "switch"
+   value: 35
+- Latency:
+   Node1: "cloudnode"
+   Node2: "officeserver"
+   value: 42
+- Latency:
+   Node1: "cloudnode"
+   Node2: "labserver"
+   value: 40 
+- Latency:
+   Node1: "cloudnode"
+   Node2: "antenna2"
+   value: 37             
+#%isprouter
+#latency(isprouter, antenna1, 8).
+#latency(isprouter, antenna2, 7).
+#latency(isprouter, private1, 6).
+#latency(isprouter, private2, 15).
+#latency(isprouter, switch, 5).
+#latency(isprouter, officeserver, 12).
+#latency(isprouter, labserver, 10).
+- Latency:
+   Node1: "isprouter"
+   Node2: "antenna1"
+   value: 8
+- Latency:
+   Node1: "isprouter"
+   Node2: "antenna2"
+   value: 7  
+- Latency:
+   Node1: "isprouter"
+   Node2: "private1"
+   value: 6  
+- Latency:
+   Node1: "isprouter"
+   Node2: "private2"
+   value: 15  
+- Latency:
+   Node1: "isprouter"
+   Node2: "switch"
+   value: 5  
+- Latency:
+   Node1: "isprouter"
+   Node2: "officeserver"
+   value: 12  
+- Latency:
+   Node1: "isprouter"
+   Node2: "labserver"
+   value: 10           
+
+
+#%antenna1
+#latency(antenna1, antenna2, 12).
+#latency(antenna1, private1, 14).
+#latency(antenna1, private2, 7).
+#latency(antenna1, switch, 13).
+#latency(antenna1, officeserver, 20).
+#latency(antenna1, labserver, 18).
+- Latency:
+   Node1: "antenna1"
+   Node2: "antenna2"
+   value: 12
+- Latency:
+   Node1: "antenna1"
+   Node2: "private1"
+   value: 14
+- Latency:
+   Node1: "antenna1"
+   Node2: "private2"
+   value: 7
+- Latency:
+   Node1: "antenna1"
+   Node2: "switch"
+   value: 13
+- Latency:
+   Node1: "antenna1"
+   Node2: "officeserver"
+   value: 20
+- Latency:
+   Node1: "antenna1"
+   Node2: "labserver"
+   value: 18      
+
+#%antenna2
+#latency(antenna2, private1, 13).
+#latency(antenna2, private2, 19).
+#latency(antenna2, switch, 12).
+#latency(antenna2, officeserver, 19).
+#latency(antenna2, labserver, 20).
+- Latency:
+   Node1: "antenna2"
+   Node2: "private1"
+   value: 13
+- Latency:
+   Node1: "antenna2"
+   Node2: "private2"
+   value: 19  
+- Latency:
+   Node1: "antenna2"
+   Node2: "switch"
+   value: 12  
+- Latency:
+   Node1: "antenna2"
+   Node2: "officeserver"
+   value: 19  
+- Latency:
+   Node1: "antenna2"
+   Node2: "labserver"
+   value: 20                 
+#%private1
+#latency(private1, private2, 21).
+#latency(private1, switch, 11).
+#latency(private1, officeserver, 18).
+#latency(private1, labserver, 16).
+- Latency:
+   Node1: "private1"
+   Node2: "private2"
+   value: 21
+- Latency:
+   Node1: "private1"
+   Node2: "switch"
+   value: 11
+- Latency:
+   Node1: "private1"
+   Node2: "officeserver"
+   value: 18 
+- Latency:
+   Node1: "private1"
+   Node2: "labserver"
+   value: 16          
+#%private2
+#latency(private2, switch, 20).
+#latency(private2, officeserver, 27).
+#latency(private2, labserver, 25).
+- Latency:
+   Node1: "private2"
+   Node2: "switch"
+   value: 20
+- Latency:
+   Node1: "private2"
+   Node2: "officeserver"
+   value: 27 
+- Latency:
+   Node1: "private2"
+   Node2: "labserver"
+   value: 25        
+#%switch
+#latency(switch, officeserver, 7).
+#latency(switch, labserver, 5).
+- Latency:
+   Node1: "switch"
+   Node2: "officeserver"
+   value: 7  
+- Latency:
+   Node1: "switch"
+   Node2: "labserver"
+   value: 5    
+#%officeserver
+#latency(officeserver, labserver, 7).
+- Latency:
+   Node1: "officeserver"
+   Node2: "labserver"
+   value: 7

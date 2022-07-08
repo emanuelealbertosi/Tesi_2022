@@ -1,0 +1,15 @@
+# syntax=docker/dockerfile:1
+
+FROM python:3.8-slim-buster
+
+WORKDIR /far
+ADD . /far
+
+COPY . /far
+RUN pip3 install -r requirements.txt
+#RUN python3 manage.py
+#ENV FLASK_APP=secondstage1.py  
+#ENV FLASK_ENV=development
+EXPOSE 5000
+ENTRYPOINT [ "python3" ]
+CMD [ "far.py" ]

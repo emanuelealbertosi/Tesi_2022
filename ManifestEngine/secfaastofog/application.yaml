@@ -1,0 +1,379 @@
+#% functionReqs(functionId, listOfSWReqs, HWReqs(memory, vCPU, Htz), timeout, listOfServiceReqs(serviceType, latency))
+#functionReqs(flogin, [docker], (1024, 2, 500), [(userDB, 13)]).
+Deployments:
+- Function:
+    id: "flogin"
+    image: albertosiemanuele/tesitestv1:flogin
+    port: 5000
+    exposed: True
+    exposed_port: 30006
+    is_ingress: True
+    type: "node"
+    bindings: 
+    - 'myusers'
+    latfromprev: 25
+    links:
+    - name: "FAR"
+      value: "http://far:5000"
+      next: True
+      fun: 'far'
+    - name: "MYUSERS"
+      value: "http://myusers:5000"
+      next: False
+- Function:
+    id: "fcrop"
+    image: albertosiemanuele/tesitestv1:fcrop
+    port: 5000
+    exposed: True
+    exposed_port: 30007
+    is_ingress: False
+    type: "node"
+    bindings:
+    - "mycrop"
+    latfromprev: 18
+    links:
+    - name: "FGEO"
+      value: "http://fgeo:5000"
+      next: True
+      fun: 'fgeo'
+    - name: "MYCROP"
+      value: "http://mycrop:5000"
+      next: False
+- Function:
+    id: "fgeo"
+    image: albertosiemanuele/tesitestv1:fgeo
+    port: 5000
+    exposed: True
+    exposed_port: 30008
+    is_ingress: False
+    type: "node"
+    bindings: 
+    latfromprev: 12
+    links:
+    - name: "MYMAPS"
+      value: "http://mymaps:5000"
+      next: False
+- Function:
+    id: "fdcc"
+    image: albertosiemanuele/tesitestv1:fdcc
+    port: 5000
+    exposed: True
+    exposed_port: 30009
+    is_ingress: False
+    type: "branch"
+    bindings: 
+    - 'greenpassapi'
+    latfromprev: 15
+    links:
+    - name: "FUNT"
+      btype: 'TRUE'
+      next: True
+      fun: "fcheckdcc"
+      value: "http://fcheckdcc:5000"
+    - name: "FUNF"
+      next: True
+      fun: "frules"
+      btype: 'FALSE'
+      value: "http://frules:5000"
+    - name: "GREENPASSAPI"
+      value: "http://greenpassapi:5000"
+      next: False
+- Function:
+    id: "fcheckdcc"
+    image: albertosiemanuele/tesitestv1:fcheckdcc
+    port: 5000
+    exposed: True
+    exposed_port: 30010
+    is_ingress: False
+    type: "node"
+    bindings:
+    - 'dccchk'
+    latfromprev: 15
+    links:
+    - name: "DCCCHK"
+      #value: "http://dccchk:5000"
+      value: "http://192.168.1.106:5000"
+      next: False
+- Function:
+    id: "frules"
+    image: albertosiemanuele/tesitestv1:frulesorder
+    port: 5000
+    exposed: True
+    exposed_port: 30011
+    is_ingress: False
+    type: "node"
+    bindings:
+    latfromprev: 18
+    links:
+    - name: "RULESCHK"
+      #value: "http://ruleschk:5000"
+      value: "http://192.168.1.105:5000"
+      next: False
+    - name: "PADDING"
+      #value: "http://ruleschk:5000"
+      value: "http://fservicepad2:5000"
+      next: False   
+- Function:
+    id: "far"
+    image: albertosiemanuele/tesitestv1:far
+    port: 5000
+    exposed: True
+    exposed_port: 30012
+    is_ingress: False
+    type: "par"
+    bindings: 
+    - 'sendmail'
+    latfromprev: 12
+    links:
+    - name: "FCROP"
+      value: "http://fcrop:5000"
+      next: True
+      fun: "fcrop"
+    - name: "FDCC"
+      value: "http://fdcc:5000"
+      next: True
+      fun: "fdcc"
+    - name: "SENDMAIL"
+      value: "http://sendmail:5000"
+      next: False
+
+###################
+EventGenerator:
+    generatorId: "userDevice" 
+    sectypes:     
+    - "top"
+    - "low"
+    - "medium"
+
+Lattice:
+  top: 
+    value: "top"
+    color: "green"
+  intermediate:
+  - value: "medium"
+    color: "orange"
+  bottom: 
+      value: "low"
+      color: "red"            
+
+NodeSecTypeCaps:
+  - label: "top"
+    present:
+    - "antiTamp"
+    - "pubKeyE"
+    absent:
+  - label: "medium"
+    present:
+    - "pubKeyE"
+    absent:
+    - "antiTamp"
+  - label: "low"
+    present:
+    absent:
+    - "pubKeyE"
+    
+ServSecTypes:   
+  - label: "top" 
+    providers:
+    - name: "appOp"
+    - name: "pa"
+  - label: "medium"
+    providers:
+    - name: "cloudProvider" 
+      serviceType: "maps" 
+    - name: "google" 
+      serviceType: "sendMail"  
+    - name: "amazon" 
+      serviceType: "ai"  
+  - label: "low"
+    exclude:
+      providers:
+        - name: "appOp"  
+        - name: "cloudProvider" 
+          serviceType: "maps"
+        - name: "cloudProvider" 
+          serviceType: "sendMail"
+           
+
+
+##################     
+
+Requirements:
+- Function:
+    id: "flogin"
+    sw:
+    - "docker"
+    hw:
+      mem: 512
+      cpu: 1
+      mhz: 500
+    services:
+    - service:
+        id: "userDB"
+        latency: 13   
+#functionReqs(fcrop, [docker], (2048, 4, 1200), []).         
+- Function:
+    id: "fcrop"
+    sw:
+    - "docker"
+    hw:
+      mem: 512
+      cpu: 1
+      mhz: 1200
+    services:
+    - service:
+        id: "ai"
+        latency: 5
+#functionReqs(fgeo, [docker], (256, 2, 400), [(maps, 30)]).        
+- Function:
+    id: "fgeo"
+    sw:
+    - "docker"
+    hw:
+      mem: 256
+      cpu: 2
+      mhz: 400
+    services:
+    - service:
+        id: "maps"
+        latency: 5 
+#functionReqs(fdcc, [docker], (128, 2, 500), []).        
+- Function:
+    id: "fdcc"
+    sw:
+    - "docker"
+    hw:
+      mem: 128
+      cpu: 2
+      mhz: 500
+    services:
+    - service:
+        id: "checkGp"
+        latency: 50 
+#functionReqs(fcheckdcc, [docker], (1600, 2, 500), [(checkGp, 50)]).        
+- Function:
+    id: "fcheckdcc"
+    sw:
+    - "docker"
+    hw:
+      mem: 512
+      cpu: 2
+      mhz: 500
+    services:
+    - service:
+        id: "dccchk"
+        latency: 50 
+#functionReqs(frules, [docker], (1800, 1, 400), [(checkRules, 20)]).        
+- Function:
+    id: "frules"
+    sw:
+    - "docker"
+    hw:
+      mem: 512
+      cpu: 1
+      mhz: 400
+    services:
+    - service:
+        id: "checkRules"
+        latency: 20
+#functionReqs(far, [docker], (2048, 4, 1200), []).        
+- Function:
+    id: "far"
+    sw:
+    hw:
+      mem: 512
+      cpu: 2
+      mhz: 1200
+    services:
+    - service:
+        id: "sendMail"
+        latency: 5
+#%functionBehaviour(functionId, listOfInputs, listOfun(serviceReq, TypeParam), listOfOutputs)
+#functionBehaviour(flogin, [U, Sc, G],[U], [U,Sc, G]).    
+
+Behaviours:
+- Function:
+    id: "flogin"
+    inputs:
+    - "U"
+    - "Sc"
+    - "G"
+    fun:
+    - "U"
+    outputs:
+    - "U"
+    - "Sc"
+    - "G"
+    rule:
+#functionBehaviour(fcrop,[_,Sc, G],[], [Sc,G]).
+- Function:
+    id: "fcrop"
+    inputs:
+    - "_"
+    - "Sc"
+    - "G"
+    fun:
+    outputs:
+    - "Sc"
+    - "G"
+    rule:  
+#functionBehaviour(fgeo, [Sc,G], [G], [Sc]).    
+- Function:
+    id: "fgeo"
+    inputs:
+    - "Sc"
+    - "G"
+    fun:
+    - "G"
+    outputs:
+    - "Sc"
+    rule:
+#functionBehaviour(fdcc, [U,_,_], [], [U,U]).    
+- Function:
+    id: "fdcc"
+    inputs:
+    - "U"
+    - "_"
+    - "_"
+    fun:
+    outputs:
+    - "low"
+    rule:
+#functionBehaviour(fcheckdcc, [_,U], [U], [low]).    
+- Function:
+    id: "fcheckdcc"
+    inputs:
+    - "_"
+    fun:
+    - "_"
+    outputs:
+    - "low"
+    rule:
+#functionBehaviour(frules, [_, U], [U], [low]).    
+- Function:
+    id: "frules"
+    inputs:
+    - "_"
+    fun:
+    - "_"
+    outputs:
+    - "low" 
+    rule:
+#functionBehaviour(far, [U,Draw], [], [ScAr]):- maxType(U, Draw, ScAr).    
+- Function:
+    id: "far"
+    inputs:
+    - "U"
+    - "Sc"
+    - "G"
+    fun:
+    - "U"
+    outputs:
+    - "U"
+    - "Sc"
+    - "G"
+    rule:
+
+
+
+

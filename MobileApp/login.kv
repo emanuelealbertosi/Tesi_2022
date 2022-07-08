@@ -1,0 +1,70 @@
+# there are three screens
+windowManager:
+    loginWindow:
+    CameraClick:
+  
+# GUI for the login window
+<loginWindow>:
+    email : email
+    pwd : pwd
+    FloatLayout:
+        size: root.width, root.height
+        Label:
+            text : "EMAIL: "
+            size_hint : 0.2, 0.1
+            pos_hint : {"x":0.25, "top":0.9}
+        TextInput:
+            id : email
+            multiline :False
+            size_hint : 0.3, 0.1
+            pos_hint : {"x" : 0.45, "top" : 0.9}
+            ####
+            ####
+        Label:
+            text : "PASSWORD: "
+            size_hint : 0.2, 0.1
+            pos_hint : {"x" : 0.25, "top" : 0.7}
+        TextInput:
+            id : pwd
+            multiline :False
+            size_hint : 0.3, 0.1
+            pos_hint : {"x" : 0.45, "top" : 0.7}
+            ####
+            ####
+        Button:
+            text : "LOGIN"
+            size_hint : 0.3, 0.1
+            pos_hint : {"x" : 0.39, "top" : 0.2}
+            on_release: 
+                root.validate()
+                root.manager.transition.direction = "up"
+  
+# GUI to show validation result
+<CameraClick>:
+    FloatLayout:
+        size: root.width, root.height
+        orientation: 'vertical'
+        ####
+        ####    
+        Camera:
+            id: camera
+            resolution: (640, 480)
+            play: True
+        ToggleButton:
+            text: 'Play'
+            on_press: camera.play = not camera.play
+            size_hint_y: None
+            height: '48dp'
+        Button:
+            text: 'Capture'
+            size_hint_y: None
+            height: '48dp'
+            on_press: root.capture()
+  
+  
+# GUI for pop up window
+<P>:
+    Label:
+        text : "Please enter valid information"
+        size_hint : 0.2, 0.1
+        pos_hint : {"x" : 0.3, "top" : 0.8}

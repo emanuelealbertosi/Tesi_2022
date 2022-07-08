@@ -1,0 +1,199 @@
+#% functionReqs(functionId, listOfSWReqs, HWReqs(memory, vCPU, Htz), timeout, listOfServiceReqs(serviceType, latency))
+#functionReqs(flogin, [docker], (1024, 2, 500), [(userDB, 13)]).
+Deployments:
+- Function:
+    id: "flogin"
+    image: albertosiemanuele/tesitestv1:flogindef
+    port: 5000
+    exposed: True
+    exposed_port: 30006
+    is_ingress: True
+    type: "node"
+    bindings: 
+    - 'myUserDb'
+    latfromprev: 25
+    links:
+    - name: "FCROP"
+      value: "http://fcrop:5000"
+      next: True
+      fun: "fcrop"
+    - name: "MYUSERS"
+      value: "http://loginmock:5000"
+      next: False
+- Function:
+    id: "fcrop"
+    image: albertosiemanuele/tesitestv1:fcropdef
+    port: 5000
+    exposed: False
+    is_ingress: False
+    type: "node"
+    bindings:
+    latfromprev: 18
+    links:
+    - name: "FDCC"
+      value: "http://fdcc:5000"
+      next: True
+      fun: "fdcc"
+- Function:
+    id: "fdcc"
+    image: albertosiemanuele/tesitestv1:fdccdef
+    port: 5000
+    exposed: False
+    is_ingress: False
+    type: "node"
+    bindings:
+    latfromprev: 15
+    links:
+    - name: "FUNT"
+      btype: 'TRUE'
+      next: False
+      fun: "fcheckdcc"
+      value: "http://fcheckdcc:5000"
+    - name: "FUNF"
+      next: False
+      fun: "frules"
+      btype: 'FALSE'
+      value: "http://frules:5000"
+    - name: "GREENPASSAPI"
+      value: "http://greenpassapi:5000"
+      next: False  
+
+
+
+###################
+EventGenerator:
+    generatorId: "userDevice" 
+    sectypes:     
+    - "top"
+    - "low"
+    - "medium"
+
+Lattice:
+  top: 
+    value: "top"
+    color: "green"
+  intermediate:
+  - value: "medium"
+    color: "orange"
+  bottom: 
+      value: "low"
+      color: "red"            
+
+NodeSecTypeCaps:
+  - label: "top"
+    present:
+    - "antiTamp"
+    - "pubKeyE"
+    absent:
+  - label: "medium"
+    present:
+    - "pubKeyE"
+    absent:
+    - "antiTamp"
+  - label: "low"
+    present:
+    absent:
+    - "pubKeyE"
+    
+ServSecTypes:   
+  - label: "top" 
+    providers:
+    - name: "appOp"
+    - name: "pa"
+  - label: "medium"
+    providers:
+    - name: "cloudProvider" 
+      serviceType: "maps" 
+  - label: "low"
+    exclude:
+      providers:
+        - name: "appOp"  
+        - name: "cloudProvider" 
+          serviceType: "maps"
+
+
+##################     
+
+Requirements:
+- Function:
+    id: "flogin"
+    sw:
+    - "docker"
+    hw:
+      mem: 512
+      cpu: 1
+      mhz: 500
+    services:
+    - service:
+        id: "userDB"
+        latency: 13   
+#functionReqs(fcrop, [docker], (2048, 4, 1200), []).         
+- Function:
+    id: "fcrop"
+    sw:
+    - "docker"
+    hw:
+      mem: 1024
+      cpu: 2
+      mhz: 1200
+    services: 
+#functionReqs(fgeo, [docker], (256, 2, 400), [(maps, 30)]).        
+#functionReqs(fdcc, [docker], (128, 2, 500), []).        
+- Function:
+    id: "fdcc"
+    sw:
+    - "docker"
+    hw:
+      mem: 128
+      cpu: 2
+      mhz: 500
+    services:
+
+#%functionBehaviour(functionId, listOfInputs, listOfun(serviceReq, TypeParam), listOfOutputs)
+#functionBehaviour(flogin, [U, Sc, G],[U], [U,Sc, G]).    
+
+Behaviours:
+- Function:
+    id: "flogin"
+    inputs:
+    - "U"
+    - "Sc"
+    - "G"
+    fun:
+    - "U"
+    outputs:
+    - "U"
+    - "Sc"
+    - "G"
+    rule:
+#functionBehaviour(fcrop,[_,Sc, G],[], [Sc,G]).
+- Function:
+    id: "fcrop"
+    inputs:
+    - "_"
+    - "Sc"
+    - "G"
+    fun:
+    outputs:
+    - "U"
+    - "Sc"
+    - "G"
+    rule:  
+#functionBehaviour(fgeo, [Sc,G], [G], [Sc]).    
+#functionBehaviour(fdcc, [U,_,_], [], [U,U]).    
+- Function:
+    id: "fdcc"
+    inputs:
+    - "U"
+    - "_"
+    - "_"
+    fun:
+    outputs:
+    - "U"
+    - "U"
+    rule:
+
+
+
+
+

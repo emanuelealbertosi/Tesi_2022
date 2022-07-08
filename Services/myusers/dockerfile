@@ -1,0 +1,15 @@
+# syntax=docker/dockerfile:1
+
+FROM python:3.8
+
+WORKDIR /myusers
+ADD . /myusers
+
+COPY . /myuser
+RUN pip3 install -r requirements.txt
+ENV FLASK_APP=myusers.py  
+ENV FLASK_ENV=development
+EXPOSE 5000
+CMD [ "flask", "run","--host", "0.0.0.0"]
+#ENTRYPOINT [ "python3" ]
+#CMD [ "myusers.py" ]

@@ -1,0 +1,15 @@
+# syntax=docker/dockerfile:1
+
+FROM python:3.8
+
+WORKDIR /dccchk
+ADD . /dccchk
+
+COPY . /dccchk
+RUN pip3 install -r requirements.txt
+ENV FLASK_APP=dccchk.py  
+ENV FLASK_ENV=development
+EXPOSE 5000
+CMD [ "flask", "run","--host", "0.0.0.0"]
+#ENTRYPOINT [ "python3" ]
+#CMD [ "dccchk.py" ]
